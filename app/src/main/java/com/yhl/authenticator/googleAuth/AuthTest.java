@@ -41,7 +41,7 @@ public class AuthTest {
     }
 
     /**
-     * 根据savedSecret秘钥值，获取此刻生成的6位验证码
+     * 根据secret秘钥值，获取此刻生成的6位验证码
      */
     @Test
     public void getAuthCodeTest() {

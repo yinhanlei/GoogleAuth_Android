@@ -1,4 +1,8 @@
+
 # Android实现二维码扫描功能
+# QRCodeDemo
+扫描二维码，识别出信息。包括读取本地相册、开启闪光灯。参考原作者项目网址  https://www.cnblogs.com/zoro-zero/p/12068613.html    原作者Demo地址：https://github.com/hongchuanfeng/QRCodeDemo.git
+
 
 ![platform](https://img.shields.io/badge/platform-Android-lightgrey.svg)
 ![Gradle](https://img.shields.io/badge/Gradle-2.3.2-brightgreen.svg)
@@ -30,3 +34,5 @@
 https://www.jianshu.com/p/e80a85b17920
 
 https://github.com/HappyMiao/QrCodeScan
+
+

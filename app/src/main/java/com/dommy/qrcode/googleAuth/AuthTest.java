@@ -1,6 +1,5 @@
-package com.yhl.authenticator.googleAuth;
+package com.dommy.qrcode.googleAuth;
 
-import com.yhl.authenticator.googleAuth.GoogleAuthenticator;
 
 import org.junit.Test;
 
@@ -16,7 +15,7 @@ public class AuthTest {
     /**
      * 生成秘钥和二维码网址
      */
-    //    @Test
+        @Test
     public void genSecretTest() {
         String secret = GoogleAuthenticator.generateSecretKey();
         String url = GoogleAuthenticator.getQRBarcodeURL("testuser", "testhost", secret);
@@ -27,12 +26,12 @@ public class AuthTest {
     /**
      * 验证APP生成的code和java后台程序生成的程序code是否一致
      */
-    //    @Test
+        @Test
     public void authTest() {
         //1测试时，把genSecretTest方法生成的secret值赋值给它
-        String savedSecret = "F366ZY5HHAFQKENQ";
+        String savedSecret = "LOXKOKAZZ6AXNQCEQ";
         //2测试时，把code值替换成APP身份验证器上的6位数字
-        long appCode = 772858;
+        long appCode = 826322;
 
         long timeMsec = System.currentTimeMillis();//当前时间
 
@@ -43,9 +42,9 @@ public class AuthTest {
     /**
      * 根据secret秘钥值，获取此刻生成的6位验证码
      */
-    @Test
+//    @Test
     public void getAuthCodeTest() {
-        String savedSecret = "F366ZY5HHAFQKENQ";
+        String savedSecret = "LOXKOKAZZ6AXNQCEQ";
         long timeMsec = System.currentTimeMillis();
 
         int code = 0;

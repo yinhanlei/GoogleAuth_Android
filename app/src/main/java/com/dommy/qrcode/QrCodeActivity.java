@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -16,14 +15,14 @@ import android.widget.Toast;
 import com.dommy.qrcode.util.Constant;
 import com.google.zxing.activity.CaptureActivity;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class QrCodeActivity extends AppCompatActivity implements View.OnClickListener {
     Button btnQrCode; // 扫码
     TextView tvResult; // 结果
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_qr);
 
         initView();
     }
@@ -40,17 +39,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 申请相机权限
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // 申请权限
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, Constant.REQ_PERM_CAMERA);
+            ActivityCompat.requestPermissions(QrCodeActivity.this, new String[]{Manifest.permission.CAMERA}, Constant.REQ_PERM_CAMERA);
             return;
         }
         // 申请文件读写权限（部分朋友遇到相册选图需要读写权限的情况，这里一并写一下）
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             // 申请权限
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.REQ_PERM_EXTERNAL_STORAGE);
+            ActivityCompat.requestPermissions(QrCodeActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.REQ_PERM_EXTERNAL_STORAGE);
             return;
         }
         // 二维码扫码
-        Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
+        Intent intent = new Intent(QrCodeActivity.this, CaptureActivity.class);
         startActivityForResult(intent, Constant.REQ_QR_CODE);
     }
 
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startQrCode();
                 } else {
                     // 被禁止授权
-                    Toast.makeText(MainActivity.this, "请至权限中心打开本应用的相机访问权限", Toast.LENGTH_LONG).show();
+                    Toast.makeText(QrCodeActivity.this, "请至权限中心打开本应用的相机访问权限", Toast.LENGTH_LONG).show();
                 }
                 break;
             case Constant.REQ_PERM_EXTERNAL_STORAGE:
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startQrCode();
                 } else {
                     // 被禁止授权
-                    Toast.makeText(MainActivity.this, "请至权限中心打开本应用的文件读写权限", Toast.LENGTH_LONG).show();
+                    Toast.makeText(QrCodeActivity.this, "请至权限中心打开本应用的文件读写权限", Toast.LENGTH_LONG).show();
                 }
                 break;
         }

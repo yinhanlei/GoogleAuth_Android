@@ -1,4 +1,4 @@
-package com.yhl.authenticator.googleAuth;
+package com.dommy.qrcode.googleAuth;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;

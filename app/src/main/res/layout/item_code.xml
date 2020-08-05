@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/shape_rounded"
-    android:orientation="horizontal">
+    android:background="@color/white"
+    android:orientation="horizontal"
+    android:padding="@dimen/dp_20">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/dp_10">
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -18,26 +18,20 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/name"
+                android:id="@+id/code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/sp_17"
+                android:textColor="@color/light_blue"
+                android:textSize="@dimen/sp_35"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/id"
+                android:id="@+id/issuer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/light_gray5"
-                android:textSize="@dimen/sp_15" />
+                android:textSize="@dimen/sp_20" />
 
-            <TextView
-                android:id="@+id/key"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/light_gray5"
-                android:textSize="@dimen/sp_15" />
         </LinearLayout>
 
         <LinearLayout
@@ -52,18 +46,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="删除"
-                android:textColor="@color/light_blue"
+                android:textColor="@color/red3"
                 android:textSize="@dimen/sp_15" />
 
             <TextView
+                android:id="@+id/countdown"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text=">"
-                android:textColor="@color/black" />
+                android:text="倒计时"
+                android:textColor="@color/light_blue"
+                android:textSize="@dimen/sp_15" />
 
         </LinearLayout>
     </LinearLayout>
-
-
 </LinearLayout>

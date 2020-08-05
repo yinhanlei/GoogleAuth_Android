@@ -1,4 +1,4 @@
-package com.zcy.valine.base;
+package com.dommy.qrcode.base;
 
 import android.app.Activity;
 

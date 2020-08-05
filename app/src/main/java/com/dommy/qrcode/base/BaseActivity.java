@@ -1,9 +1,9 @@
-package com.zcy.valine.base;
+package com.dommy.qrcode.base;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
-import androidx.annotation.Nullable;
 
 /**
  * Created by yhl on 2018/3/8.

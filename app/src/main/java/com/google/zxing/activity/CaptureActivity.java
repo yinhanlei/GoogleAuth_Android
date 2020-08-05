@@ -1,5 +1,6 @@
 package com.google.zxing.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -70,7 +71,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
     private ViewfinderView viewfinderView;
     private ImageButton back;
     private ImageButton btnFlash;
-    private Button btnAlbum; // 相册
+    //    private Button btnAlbum; // 相册
     private boolean isFlashOn = false;
     private boolean hasSurface;
     private Vector<BarcodeFormat> decodeFormats;
@@ -84,6 +85,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
     private String photo_path;
     private Bitmap scanBitmap;
     //	private Button cancelScanButton;
+
     /**
      * Called when the activity is first created.
      */
@@ -105,10 +107,10 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
         btnFlash = (ImageButton) findViewById(R.id.btn_flash);
         btnFlash.setOnClickListener(flashListener);
 
-        btnAlbum = (Button) findViewById(R.id.btn_album);
-        btnAlbum.setOnClickListener(albumOnClick);
+        //        btnAlbum = (Button) findViewById(R.id.btn_album);
+        //        btnAlbum.setOnClickListener(albumOnClick);
 
-//		cancelScanButton = (Button) this.findViewById(R.id.btn_cancel_scan);
+        //		cancelScanButton = (Button) this.findViewById(R.id.btn_cancel_scan);
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
 
@@ -127,7 +129,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
 
     @Override
     protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
-        if (resultCode==RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_SCAN_GALLERY:
                     handleAlbumPic(data);
@@ -139,6 +141,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
 
     /**
      * 处理选择的图片
+     *
      * @param data
      */
     private void handleAlbumPic(Intent data) {
@@ -158,7 +161,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
                 if (result != null) {
                     Intent resultIntent = new Intent();
                     Bundle bundle = new Bundle();
-                    bundle.putString(Constant.INTENT_EXTRA_KEY_QR_SCAN ,result.getText());
+                    bundle.putString(Constant.INTENT_EXTRA_KEY_QR_SCAN, result.getText());
 
                     resultIntent.putExtras(bundle);
                     CaptureActivity.this.setResult(RESULT_OK, resultIntent);
@@ -172,6 +175,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
 
     /**
      * 扫描二维码图片的方法
+     *
      * @param uri
      * @return
      */
@@ -221,13 +225,13 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
         vibrate = true;
 
         //quit the scan view
-//		cancelScanButton.setOnClickListener(new OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//				CaptureActivity.this.finish();
-//			}
-//		});
+        //		cancelScanButton.setOnClickListener(new OnClickListener() {
+        //
+        //			@Override
+        //			public void onClick(View v) {
+        //				CaptureActivity.this.finish();
+        //			}
+        //		});
     }
 
     @Override
@@ -265,8 +269,8 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
             bundle.putString(Constant.INTENT_EXTRA_KEY_QR_SCAN, resultString);
             System.out.println("sssssssssssssssss scan 0 = " + resultString);
             // 不能使用Intent传递大于40kb的bitmap，可以使用一个单例对象存储这个bitmap
-//            bundle.putParcelable("bitmap", barcode);
-//            Logger.d("saomiao",resultString);
+            //            bundle.putParcelable("bitmap", barcode);
+            //            Logger.d("saomiao",resultString);
             resultIntent.putExtras(bundle);
             this.setResult(RESULT_OK, resultIntent);
         }
@@ -367,14 +371,14 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
     };
 
     /**
-     *  闪光灯开关按钮
+     * 闪光灯开关按钮
      */
     private View.OnClickListener flashListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             try {
                 boolean isSuccess = CameraManager.get().setFlashLight(!isFlashOn);
-                if(!isSuccess){
+                if (!isSuccess) {
                     Toast.makeText(CaptureActivity.this, "暂时无法开启闪光灯", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -387,7 +391,7 @@ public class CaptureActivity extends AppCompatActivity implements Callback {
                     btnFlash.setImageResource(R.drawable.flash_on);
                     isFlashOn = true;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

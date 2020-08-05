@@ -302,11 +302,11 @@ public class MainActivity extends BaseActivity {
                         saveSp();
                     } else {
                         Log.i(TAG, secret + " 该秘钥值已存在，不用重复添加。");
-                        Toast.makeText(context, "已存在，不用重复添加", Toast.LENGTH_SHORT);
+                        Toast.makeText(context, "已存在，不用重复添加", Toast.LENGTH_SHORT).show();
                     }
                 }
             } else {
-                Toast.makeText(context, "扫描结果错误！请重新扫描", Toast.LENGTH_SHORT);
+                Toast.makeText(context, "扫描结果错误！请重新扫描", Toast.LENGTH_SHORT).show();
 
             }
         }

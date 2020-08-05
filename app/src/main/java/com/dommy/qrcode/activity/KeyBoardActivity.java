@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,6 +51,30 @@ public class KeyBoardActivity extends BaseActivity {
                 finish();
             }
         });
+        edit_sercet.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    for (int i = 0; i < s.length(); i++) {
+                        char c = s.charAt(i);
+                        if (c >= 0x4e00 && c <= 0X9fff) {
+                            // 根据字节码判断
+                            // 如果是中文，则清除输入的字符，否则保留
+                            s.delete(i, i + 1);
+                            Toast.makeText(context, "秘钥不能是汉字，只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+        });
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,10 +93,10 @@ public class KeyBoardActivity extends BaseActivity {
                     Toast.makeText(context, "秘钥不能全是数字", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (isNumericChar(sercet) == false) {
-                    Toast.makeText(context, "秘钥只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                //                if (isNumericChar(sercet) == false) {
+                //                    Toast.makeText(context, "秘钥只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
+                //                    return;
+                //                }
                 if (sercet.length() < 16) {
                     Toast.makeText(context, "秘钥长度不能低于16位", Toast.LENGTH_SHORT).show();
                     return;

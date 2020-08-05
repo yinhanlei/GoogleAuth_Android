@@ -2,9 +2,12 @@ package com.dommy.qrcode;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -78,15 +81,34 @@ public class MainActivity extends BaseActivity {
         //        codeList.add(new CodeBean("52MM34W6OFWETSKF", "测试2"));
         //        codeList.add(new CodeBean("O2QSKW27S4GBTWBM", "测试3"));
         //        codeList.add(new CodeBean("3WRGITAMFPASJMDA", "测试4"));
-        dynamicSetData(codeList);
+        //
+        SharedPreferences sp = getSharedPreferences("codeList", MODE_PRIVATE);
+        String codeStr = sp.getString("codeStr", "");
+        Log.i(TAG, "本地存储codeStr= " + codeStr);
+        if (codeStr.length() > 0 && codeStr.contains(":")) {
+            if (codeStr.contains("-")) {//存多个
+                String[] codeStrArr = codeStr.split("-");
+                for (String codeStr1 : codeStrArr) {
+                    String sercet = codeStr1.split(":")[0];
+                    String issuer = codeStr1.split(":")[1];
+                    codeList.add(new CodeBean(sercet, issuer));
+                }
+            } else {//只存一个
+                String sercet = codeStr.split(":")[0];
+                String issuer = codeStr.split(":")[1];
+                codeList.add(new CodeBean(sercet, issuer));
+            }
+        }
+        if (codeList.size() > 0)
+            dynamicSetData(codeList);
     }
 
     /**
      * 动态显示数据
      */
-    private void dynamicSetData(final List<CodeBean> codeList) {
-        for (int i = 0; i < codeList.size(); i++) {
-            final CodeBean bean = codeList.get(i);
+    private void dynamicSetData(final List<CodeBean> codeLi) {
+        for (int i = 0; i < codeLi.size(); i++) {
+            final CodeBean bean = codeLi.get(i);
             final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
             TextView code = convertView.findViewById(R.id.code);
             TextView issuer = convertView.findViewById(R.id.issuer);
@@ -120,21 +142,35 @@ public class MainActivity extends BaseActivity {
 
             }.start();
 
-
             ll_item.addView(convertView);
             btn_del.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
-                    codeList.remove(bean);
-                    Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
-                    ll_item.removeView(convertView);
-                    ll_item.removeView(line);
-                    timer.cancel();
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("删除提示");
+                    builder.setMessage("删除后秘钥信息将不存在。请提前保存秘钥值或秘钥二维码！");
+                    final AlertDialog alertDialog = builder.create();
+                    builder.setPositiveButton("继续删除", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            alertDialog.dismiss();
+                            //更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
+                            Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
+                            ll_item.removeView(convertView);
+                            ll_item.removeView(line);
+                            codeList.remove(bean);
+                            //保存在本地
+                            saveSp();
+                            timer.cancel();
+                        }
+                    });
+                    builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            alertDialog.dismiss();
+                        }
+                    });
+                    builder.show();
                 }
             });
-
-
         }
     }
 
@@ -240,17 +276,20 @@ public class MainActivity extends BaseActivity {
             if (scanResult.length() > 0 && scanResult.contains("secret=")) {//要将其加到list里，且重复的不能添加。之后要更新适配器。还得将最新的list保存进本地
                 String[] aArr = scanResult.replace("//", "").split("\\?");
                 String user = aArr[0].split("/")[1];
-                Log.i(TAG, "user= " + user);
+                //                Log.i(TAG, "user= " + user);
                 String[] scanResultArr = aArr[1].split("&");
                 String secret = scanResultArr[0].split("=")[1];
-                String issuer = scanResultArr[1].split("=")[1] + "(" + user + ")";
+                String issuer = scanResultArr[1].split("=")[1] + " (" + user + ")";
                 //                Log.i(TAG, "secret= " + secret + "  issuer= " + issuer);
                 //更新数据源，并只将最新的一条item添加进父布局。
                 if (codeList.size() == 0) {
-                    codeList.add(new CodeBean(secret, issuer));
                     List<CodeBean> codeListAdd = new ArrayList<>();
                     codeListAdd.add(new CodeBean(secret, issuer));
                     dynamicSetData(codeListAdd);
+                    codeList.add(new CodeBean(secret, issuer));
+
+                    //保存在本地
+                    saveSp();
                 } else {
                     boolean isExistSecret = false;
                     for (CodeBean bean : codeList) {
@@ -258,31 +297,22 @@ public class MainActivity extends BaseActivity {
                             isExistSecret = true;
                             break;
                         }
-                        //如果别名重复怎么处理
                     }
                     if (isExistSecret == false) {
-                        codeList.add(new CodeBean(secret, issuer));
                         List<CodeBean> codeListAdd = new ArrayList<>();
                         codeListAdd.add(new CodeBean(secret, issuer));
                         dynamicSetData(codeListAdd);
+                        codeList.add(new CodeBean(secret, issuer));
+                        //保存在本地
+                        saveSp();
                     } else {
                         Log.i(TAG, secret + " 该秘钥值已存在，不用重复添加。");
                         Toast.makeText(context, "已存在，不用重复添加", Toast.LENGTH_SHORT);
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(context, "已存在，不用重复添加", Toast.LENGTH_SHORT);
-                            }
-                        });
                     }
                 }
             } else {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context, "扫描结果错误！请重新扫描", Toast.LENGTH_SHORT);
-                    }
-                });
+                Toast.makeText(context, "扫描结果错误！请重新扫描", Toast.LENGTH_SHORT);
+
             }
         }
     }
@@ -312,6 +342,26 @@ public class MainActivity extends BaseActivity {
             //                }
             //                break;
         }
+    }
+
+    /**
+     * 将数据保存在SharedPreferences
+     */
+    private void saveSp() {
+        String codeStr = "";
+        for (CodeBean bean : codeList) {
+            if (codeStr.length() == 0) {
+                codeStr = bean.getSecret() + ":" + bean.getIssuer();
+            } else {
+                codeStr = codeStr + "-" + bean.getSecret() + ":" + bean.getIssuer();
+            }
+        }
+        Log.i(TAG, "codeStr= " + codeStr);
+        SharedPreferences sp = getSharedPreferences("codeList", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.clear();
+        editor.putString("codeStr", codeStr);
+        editor.commit();
     }
 
 }

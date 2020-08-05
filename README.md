@@ -30,6 +30,7 @@ http://192.168.40.196:11111/#g=1&p=%E8%AE%BE%E7%BD%AE%E5%8A%A8%E6%80%81%E5%8F%A3
 	需要commons-codec-1.8.jar，下载网址在 https://www.jianshu.com/p/c1e8cab1a569
 开发主要部分：
 1、生成验证码
+
 2、30s倒计时更新：item里定时器的实现
 3、扫二维码识别：参考原作者项目网址  https://www.cnblogs.com/zoro-zero/p/12068613.html    原作者Demo地址：https://github.com/hongchuanfeng/QRCodeDemo.git
 4、同步时间
@@ -41,5 +42,9 @@ http://192.168.40.196:11111/#g=1&p=%E8%AE%BE%E7%BD%AE%E5%8A%A8%E6%80%81%E5%8F%A3
 
 #本项目开发，在QRCodeDemo项目的基础上进行。
 
+
+注意事项：
+如果复制该项目代码进自己新建的项目里，二维码启动失败。原因极大可能是，新建项目和本项目的配置文件不一致造成的。
+注意App build.gredle、proguard-rules.pro、项目 build.gredle、gradle.properties、gradlew、gradlew.bat。
 
 

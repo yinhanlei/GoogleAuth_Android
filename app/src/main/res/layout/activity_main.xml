@@ -30,10 +30,10 @@
             android:layout_weight="1" />
 
         <!--<TextView-->
-            <!--android:id="@+id/btn_setting"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@drawable/btn_set" />-->
+        <!--android:id="@+id/btn_setting"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="@drawable/btn_set" />-->
 
     </LinearLayout>
 
@@ -41,8 +41,8 @@
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/dp_10"
-        android:layout_below="@+id/title">
+        android:layout_below="@+id/title"
+        android:layout_marginTop="@dimen/dp_10">
 
         <LinearLayout
             android:id="@+id/ll_item"
@@ -63,3 +63,4 @@
         android:background="@drawable/btn_add" />
 
 </RelativeLayout>
+

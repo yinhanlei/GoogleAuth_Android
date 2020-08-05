@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-
 /**
  * Created by yhl on 2018/3/8.
  */

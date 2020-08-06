@@ -34,12 +34,12 @@ public class RingProgressBar extends View {
   private int result = 0;
 
   //默认padding值
-  private int padding = 0;
+  private int padding = 2;
 
-  //圆环的颜色
+  //圆环的颜色，如果将圆环的颜色设置和背景色一致，就相当于去除圆环
   private int ringColor;
 
-  //圆环进度颜色
+  //圆环内进度颜色
   private int ringProgressColor;
 
   //文字颜色
@@ -248,7 +248,7 @@ public class RingProgressBar extends View {
     width = w;
     height = h;
     //初始化padding值 默认设置为5
-    padding = dp2px(5);
+    padding = dp2px(3);
   }
 
 

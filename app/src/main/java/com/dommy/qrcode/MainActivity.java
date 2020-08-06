@@ -122,7 +122,9 @@ public class MainActivity extends BaseActivity {
             final TextView issuer = convertView.findViewById(R.id.issuer);
             TextView btn_del = convertView.findViewById(R.id.btn_del);
             final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
-            code.setText(getAuthCodeTest(bean.getSecret(), System.currentTimeMillis()));
+            String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
+            codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
+            code.setText(codeStr);
             if (bean.getIssuer().equals(" ")) {
                 issuer.setText(bean.getUser());
             } else {
@@ -138,8 +140,8 @@ public class MainActivity extends BaseActivity {
             final CountDownTimer timer = new CountDownTimer(30 * 1000, 1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    countdown.setProgress((int)millisUntilFinished / 1000);
-//                    countdown.setText("" + millisUntilFinished / 1000);
+                    countdown.setProgress((int) millisUntilFinished / 1000);
+                    //                    countdown.setText("" + millisUntilFinished / 1000);
                 }
 
                 @Override

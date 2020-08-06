@@ -15,7 +15,7 @@ public class AuthTest {
     /**
      * 生成秘钥和二维码网址
      */
-        @Test
+    //    @Test
     public void genSecretTest() {
         String secret = GoogleAuthenticator.generateSecretKey();
         String url = GoogleAuthenticator.getQRBarcodeURL("testuser", "testhost", secret);
@@ -26,7 +26,7 @@ public class AuthTest {
     /**
      * 验证APP生成的code和java后台程序生成的程序code是否一致
      */
-        @Test
+    //    @Test
     public void authTest() {
         //1测试时，把genSecretTest方法生成的secret值赋值给它
         String savedSecret = "LOXKOKAZZ6AXNQCEQ";
@@ -42,7 +42,7 @@ public class AuthTest {
     /**
      * 根据secret秘钥值，获取此刻生成的6位验证码
      */
-//    @Test
+    @Test
     public void getAuthCodeTest() {
         String savedSecret = "LOXKOKAZZ6AXNQCEQ";
         long timeMsec = System.currentTimeMillis();

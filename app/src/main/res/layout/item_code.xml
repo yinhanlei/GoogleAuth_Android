@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_click"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/white"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="@dimen/dp_20">
 
     <LinearLayout
@@ -11,53 +13,65 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/issuer"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:textColor="@color/light_gray5"
+            android:textSize="@dimen/sp_20" />
 
-            <TextView
-                android:id="@+id/code"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/light_blue"
-                android:textSize="@dimen/sp_35"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/issuer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/light_gray5"
-                android:textSize="@dimen/sp_20" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/dp_20"
+        <TextView
+            android:id="@+id/btn_del"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
             android:gravity="center"
-            android:orientation="vertical">
+            android:text="删除"
+            android:textColor="@color/red3"
+            android:textSize="@dimen/sp_15" />
 
-            <TextView
-                android:id="@+id/btn_del"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="删除"
-                android:textColor="@color/red3"
-                android:textSize="@dimen/sp_15" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/countdown"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="倒计时"
-                android:textColor="@color/light_blue"
-                android:textSize="@dimen/sp_15" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        </LinearLayout>
+        <TextView
+            android:id="@+id/code"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/light_blue"
+            android:textSize="@dimen/sp_35"
+            android:textStyle="bold" />
+
+
+        <!--<TextView-->
+        <!--android:id="@+id/countdown"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:gravity="center"-->
+        <!--android:text="倒计时"-->
+        <!--android:textColor="@color/light_blue"-->
+        <!--android:textSize="@dimen/sp_15" />-->
+
+        <com.dommy.qrcode.view.RingProgressBar
+            android:id="@+id/countdown"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_alignParentTop="false"
+            android:layout_centerInParent="false"
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_gravity="center"
+            app:max="30"
+            app:ringColor="@color/light_blue"
+            app:ringProgressColor="@color/light_blue"
+            app:ringWidth="1dp"
+            app:style="FILL"
+            app:textColor="@color/light_blue"
+            app:textIsShow="true"
+            app:textSize="16sp" />
+
     </LinearLayout>
 </LinearLayout>

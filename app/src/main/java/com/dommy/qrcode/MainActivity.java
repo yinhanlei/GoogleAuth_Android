@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,26 +30,33 @@ import com.dommy.qrcode.base.BaseActivity;
 import com.dommy.qrcode.bean.CodeBean;
 import com.dommy.qrcode.googleAuth.GoogleAuthenticator;
 import com.dommy.qrcode.util.Constant;
+import com.dommy.qrcode.view.RingProgressBar;
 import com.google.zxing.activity.CaptureActivity;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 布局实现原理：1不采用list item添加定时器的方式。
  * 2采用动态添加布局的方式。
  * 3数据源的处理，第一次启动APP如果本地有保存数据则读出并做第一次全量显示。
  * 新增时，更新数据源，并只将最新的一条item添加进父布局。
- * 修改时，也就是在倒计时结束后，要重新起定时器，这里的处理是不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
+ * 倒计时结束时，要重新起定时器，这里的处理是不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
  * 删除时，更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
+ * 修改时，
  */
 public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
     private TextView btn_setting, btn_add;
     private List<CodeBean> codeList = new ArrayList<>();
+    //    private Set<String> sercetSet = new HashSet<>() ;
     private Context context;
     private Handler handler;
     private LinearLayout ll_item;//item父布局
@@ -69,7 +77,7 @@ public class MainActivity extends BaseActivity {
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setDialog();
+                setAddDialog();
             }
         });
         //        codeList.add(new CodeBean("LOXKOKAZZ6AXNQCEQ", "测试1"));
@@ -84,14 +92,18 @@ public class MainActivity extends BaseActivity {
             if (codeStr.contains("-")) {//存多个
                 String[] codeStrArr = codeStr.split("-");
                 for (String codeStr1 : codeStrArr) {
-                    String sercet = codeStr1.split(":")[0];
-                    String issuer = codeStr1.split(":")[1];
-                    codeList.add(new CodeBean(sercet, issuer));
+                    String user = codeStr1.split(":")[0];
+                    String sercet = codeStr1.split(":")[1];
+                    String issuer = codeStr1.split(":")[2];
+                    codeList.add(new CodeBean(user, sercet, issuer));
+                    //                    sercetSet.add(sercet);
                 }
             } else {//只存一个
-                String sercet = codeStr.split(":")[0];
-                String issuer = codeStr.split(":")[1];
-                codeList.add(new CodeBean(sercet, issuer));
+                String user = codeStr.split(":")[0];
+                String sercet = codeStr.split(":")[1];
+                String issuer = codeStr.split(":")[2];
+                codeList.add(new CodeBean(user, sercet, issuer));
+                //                sercetSet.add(sercet);
             }
         }
         if (codeList.size() > 0)
@@ -105,42 +117,62 @@ public class MainActivity extends BaseActivity {
         for (int i = 0; i < codeLi.size(); i++) {
             final CodeBean bean = codeLi.get(i);
             final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
+            LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
             TextView code = convertView.findViewById(R.id.code);
-            TextView issuer = convertView.findViewById(R.id.issuer);
+            final TextView issuer = convertView.findViewById(R.id.issuer);
             TextView btn_del = convertView.findViewById(R.id.btn_del);
-            final TextView countdown = convertView.findViewById(R.id.countdown);
+            final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
             code.setText(getAuthCodeTest(bean.getSecret(), System.currentTimeMillis()));
-            issuer.setText(bean.getIssuer());
-
+            if (bean.getIssuer().equals(" ")) {
+                issuer.setText(bean.getUser());
+            } else {
+                issuer.setText(bean.getIssuer() + " (" + bean.getUser() + ")");
+            }
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.setMargins(0, 0, 0, 0);//4个参数按顺序分别是左上右下
-            final View line = new View(context);
+            final View line1 = new View(context);
             layoutParams.height = 20;
-            line.setLayoutParams(layoutParams);
-            line.setBackgroundResource(R.color.light_gray1);
-            ll_item.addView(line);
+            line1.setLayoutParams(layoutParams);
+            line1.setBackgroundResource(R.color.light_gray1);
+            ll_item.addView(line1);
             final CountDownTimer timer = new CountDownTimer(30 * 1000, 1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    countdown.setText("" + millisUntilFinished / 1000);
+                    countdown.setProgress((int)millisUntilFinished / 1000);
+//                    countdown.setText("" + millisUntilFinished / 1000);
                 }
 
                 @Override
                 public void onFinish() {
                     //倒计时结束后，不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
+                    CodeBean newCodeBean = null;
+                    for (CodeBean codeBean : codeList) {
+                        if (codeBean.getSecret().equals(bean.getSecret())) {
+                            newCodeBean = new CodeBean(codeBean.getUser(), codeBean.getSecret(), codeBean.getIssuer());
+                        }
+                    }
                     ll_item.removeView(convertView);
-                    ll_item.removeView(line);
+                    ll_item.removeView(line1);
                     List<CodeBean> codeListUpdate = new ArrayList<>();
-                    codeListUpdate.add(bean);
+                    codeListUpdate.add(newCodeBean);
                     dynamicSetData(codeListUpdate);
                 }
-
             }.start();
 
             ll_item.addView(convertView);
+            ll_click.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    //弹出修改user值
+                    //                    issuer.setText("888888");
+                    setModifyDialog(convertView, line1, timer, bean);
+                    return false;
+                }
+            });
             btn_del.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    timer.cancel();
                     final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("删除提示");
                     builder.setMessage("删除后秘钥信息将不存在。请提前保存秘钥值或秘钥二维码！");
@@ -149,18 +181,22 @@ public class MainActivity extends BaseActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             alertDialog.dismiss();
                             //更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
-                            Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
-                            ll_item.removeView(convertView);
-                            ll_item.removeView(line);
                             codeList.remove(bean);
                             //保存在本地
                             saveSp();
-                            timer.cancel();
+                            ll_item.removeView(convertView);
+                            ll_item.removeView(line1);
+                            Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
                         }
                     });
                     builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             alertDialog.dismiss();
+                            ll_item.removeView(convertView);
+                            ll_item.removeView(line1);
+                            List<CodeBean> codeListUpdate = new ArrayList<>();
+                            codeListUpdate.add(bean);
+                            dynamicSetData(codeListUpdate);
                         }
                     });
                     builder.show();
@@ -169,7 +205,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void setDialog() {
+    private void setAddDialog() {
         final Dialog mCameraDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
                 R.layout.pop_dialog_meun, null);
@@ -202,6 +238,81 @@ public class MainActivity extends BaseActivity {
                 mCameraDialog.dismiss();
                 Intent intent = new Intent(MainActivity.this, KeyBoardActivity.class);
                 startActivityForResult(intent, Constant.REQ_QR_CODE);
+            }
+        });
+    }
+
+    /**
+     * 修改别名
+     */
+    private void setModifyDialog(final View convertView, final View line1, final CountDownTimer timer, final CodeBean bean) {
+        final Dialog modifyDialog = new Dialog(this, R.style.BottomDialog);
+        LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
+                R.layout.pop_dialog_modify, null);
+        //初始化视图
+        modifyDialog.setContentView(root);
+        Window dialogWindow = modifyDialog.getWindow();
+        dialogWindow.setGravity(Gravity.CENTER);
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes(); // 获取对话框当前的参数值
+        lp.x = 0; // 新位置X坐标
+        lp.y = 0; // 新位置Y坐标
+        lp.width = (int) getResources().getDisplayMetrics().widthPixels; // 宽度
+        root.measure(0, 0);
+        lp.height = root.getMeasuredHeight();
+
+        lp.alpha = 9f; // 透明度
+        dialogWindow.setAttributes(lp);
+        modifyDialog.setCanceledOnTouchOutside(false);
+        modifyDialog.show();
+        final EditText edit_name_modify = root.findViewById(R.id.edit_name_modify);
+        edit_name_modify.setText(bean.getUser());
+
+        /**
+         * 修改时倒计时取消
+         */
+        timer.cancel();
+
+        root.findViewById(R.id.btn_cancle).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                modifyDialog.dismiss();
+                ll_item.removeView(convertView);
+                ll_item.removeView(line1);
+                List<CodeBean> codeListUpdate = new ArrayList<>();
+                codeListUpdate.add(bean);
+                dynamicSetData(codeListUpdate);
+            }
+        });
+        root.findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String user = edit_name_modify.getText().toString();
+                if (user.length() == 0) {
+                    Toast.makeText(context, "请填写", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (user.equals(bean.getUser())) {
+                    modifyDialog.dismiss();
+                    ll_item.removeView(convertView);
+                    ll_item.removeView(line1);
+                    List<CodeBean> codeListUpdate = new ArrayList<>();
+                    codeListUpdate.add(bean);
+                    dynamicSetData(codeListUpdate);
+                } else {
+                    codeList.remove(bean);
+                    saveSp();
+                    CodeBean newCodeBean = new CodeBean(user, bean.getSecret(), bean.getIssuer());
+                    codeList.add(newCodeBean);
+                    saveSp();
+
+                    modifyDialog.dismiss();
+                    ll_item.removeView(convertView);
+                    ll_item.removeView(line1);
+                    List<CodeBean> codeListUpdate = new ArrayList<>();
+                    codeListUpdate.add(newCodeBean);
+                    dynamicSetData(codeListUpdate);
+                    Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -274,14 +385,14 @@ public class MainActivity extends BaseActivity {
                 //                Log.i(TAG, "user= " + user);
                 String[] scanResultArr = aArr[1].split("&");
                 String secret = scanResultArr[0].split("=")[1];
-                String issuer = scanResultArr[1].split("=")[1] + " (" + user + ")";
+                String issuer = scanResultArr[1].split("=")[1];
                 //                Log.i(TAG, "secret= " + secret + "  issuer= " + issuer);
                 //更新数据源，并只将最新的一条item添加进父布局。
                 if (codeList.size() == 0) {
                     List<CodeBean> codeListAdd = new ArrayList<>();
-                    codeListAdd.add(new CodeBean(secret, issuer));
+                    codeListAdd.add(new CodeBean(user, secret, issuer));
                     dynamicSetData(codeListAdd);
-                    codeList.add(new CodeBean(secret, issuer));
+                    codeList.add(new CodeBean(user, secret, issuer));
 
                     //保存在本地
                     saveSp();
@@ -295,9 +406,9 @@ public class MainActivity extends BaseActivity {
                     }
                     if (isExistSecret == false) {
                         List<CodeBean> codeListAdd = new ArrayList<>();
-                        codeListAdd.add(new CodeBean(secret, issuer));
+                        codeListAdd.add(new CodeBean(user, secret, issuer));
                         dynamicSetData(codeListAdd);
-                        codeList.add(new CodeBean(secret, issuer));
+                        codeList.add(new CodeBean(user, secret, issuer));
                         //保存在本地
                         saveSp();
                     } else {
@@ -307,7 +418,6 @@ public class MainActivity extends BaseActivity {
                 }
             } else {
                 Toast.makeText(context, "扫描结果错误！请重新扫描", Toast.LENGTH_SHORT).show();
-
             }
         }
     }
@@ -346,9 +456,9 @@ public class MainActivity extends BaseActivity {
         String codeStr = "";
         for (CodeBean bean : codeList) {
             if (codeStr.length() == 0) {
-                codeStr = bean.getSecret() + ":" + bean.getIssuer();
+                codeStr = bean.getUser() + ":" + bean.getSecret() + ":" + bean.getIssuer();
             } else {
-                codeStr = codeStr + "-" + bean.getSecret() + ":" + bean.getIssuer();
+                codeStr = codeStr + "-" + bean.getUser() + ":" + bean.getSecret() + ":" + bean.getIssuer();
             }
         }
         Log.i(TAG, "codeStr= " + codeStr);

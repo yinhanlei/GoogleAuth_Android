@@ -40,7 +40,9 @@ http://192.168.40.196:11111/#g=1&p=%E8%AE%BE%E7%BD%AE%E5%8A%A8%E6%80%81%E5%8F%A3
 参考原作者项目网址  https://www.cnblogs.com/zoro-zero/p/12068613.html
 原作者Demo地址：https://github.com/hongchuanfeng/QRCodeDemo.git
 
-#本项目开发，在QRCodeDemo项目的基础上进行。
+# 圆饼进度条 实现二维码扫描功能
+
+#本项目开发：参考原作者项目网址https://www.jb51.net/article/123133.htm  原作者Demo地址：https://github.com/yanjiabin/ExtendsRingPrigressBar
 
 
 注意事项：

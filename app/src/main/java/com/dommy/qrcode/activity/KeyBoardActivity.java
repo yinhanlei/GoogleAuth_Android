@@ -79,13 +79,13 @@ public class KeyBoardActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 String result = "otpauth://totp/";//otpauth://totp/?secret=LOXKOKZZ6AXNQCEQ&issuer=HUOBI
-                String name = edit_name.getText().toString();
+                String user = edit_name.getText().toString();
                 String sercet = edit_sercet.getText().toString();
-                if (name.length() == 0 || sercet.length() == 0) {
+                if (user.length() == 0 || sercet.length() == 0) {
                     Toast.makeText(context, "请填写完整", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (isNumeric(name)) {
+                if (isNumeric(user)) {
                     Toast.makeText(context, "别名不能全是数字", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -93,16 +93,16 @@ public class KeyBoardActivity extends BaseActivity {
                     Toast.makeText(context, "秘钥不能全是数字", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //                if (isNumericChar(sercet) == false) {
-                //                    Toast.makeText(context, "秘钥只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
-                //                    return;
-                //                }
+                if (isNumericChar(sercet) == false) {
+                    Toast.makeText(context, "秘钥只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (sercet.length() < 16) {
                     Toast.makeText(context, "秘钥长度不能低于16位", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                long user = System.currentTimeMillis();
-                result = result + user + "?secret=" + sercet.toUpperCase() + "&issuer=" + name;
+//                long user = System.currentTimeMillis();
+                result = result + user + "?secret=" + sercet.toUpperCase() + "&issuer= ";
                 Intent resultIntent = new Intent();
                 Bundle bundle = new Bundle();
                 bundle.putString(Constant.INTENT_EXTRA_KEY_QR_SCAN, result);

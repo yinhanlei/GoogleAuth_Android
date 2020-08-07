@@ -35,12 +35,8 @@ import com.google.zxing.activity.CaptureActivity;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 布局实现原理：1不采用list item添加定时器的方式。
@@ -55,8 +51,7 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
     private TextView btn_setting, btn_add;
-    private List<CodeBean> codeList = new ArrayList<>();
-    //    private Set<String> sercetSet = new HashSet<>() ;
+    private Map<String, CodeBean> codeMap = new HashMap<>();//key秘钥，value信息
     private Context context;
     private Handler handler;
     private LinearLayout ll_item;//item父布局
@@ -80,11 +75,8 @@ public class MainActivity extends BaseActivity {
                 setAddDialog();
             }
         });
-        //        codeList.add(new CodeBean("LOXKOKAZZ6AXNQCEQ", "测试1"));
-        //        codeList.add(new CodeBean("52MM34W6OFWETSKF", "测试2"));
-        //        codeList.add(new CodeBean("O2QSKW27S4GBTWBM", "测试3"));
-        //        codeList.add(new CodeBean("3WRGITAMFPASJMDA", "测试4"));
-        //
+        //        codeMap.add("LOXKOKAZZ6AXNQCEQ",new CodeBean("测试1","LOXKOKAZZ6AXNQCEQ", "测试"));
+        //        codeMap.add("52MM34W6OFWETSKF",new CodeBean("测试2","52MM34W6OFWETSKF", "测试"));
         SharedPreferences sp = getSharedPreferences("codeList", MODE_PRIVATE);
         String codeStr = sp.getString("codeStr", "");
         Log.i(TAG, "本地存储codeStr= " + codeStr);
@@ -95,27 +87,24 @@ public class MainActivity extends BaseActivity {
                     String user = codeStr1.split(":")[0];
                     String sercet = codeStr1.split(":")[1];
                     String issuer = codeStr1.split(":")[2];
-                    codeList.add(new CodeBean(user, sercet, issuer));
-                    //                    sercetSet.add(sercet);
+                    codeMap.put(sercet, new CodeBean(user, sercet, issuer));
                 }
             } else {//只存一个
                 String user = codeStr.split(":")[0];
                 String sercet = codeStr.split(":")[1];
                 String issuer = codeStr.split(":")[2];
-                codeList.add(new CodeBean(user, sercet, issuer));
-                //                sercetSet.add(sercet);
+                codeMap.put(sercet, new CodeBean(user, sercet, issuer));
             }
         }
-        if (codeList.size() > 0)
-            dynamicSetData(codeList);
+        if (codeMap.size() > 0)
+            dynamicSetData(codeMap);
     }
 
     /**
      * 动态显示数据
      */
-    private void dynamicSetData(final List<CodeBean> codeLi) {
-        for (int i = 0; i < codeLi.size(); i++) {
-            final CodeBean bean = codeLi.get(i);
+    private void dynamicSetData(final Map<String, CodeBean> codeMa) {
+        for (final CodeBean bean : codeMa.values()) {
             final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
             LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
             TextView code = convertView.findViewById(R.id.code);
@@ -148,16 +137,16 @@ public class MainActivity extends BaseActivity {
                 public void onFinish() {
                     //倒计时结束后，不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
                     CodeBean newCodeBean = null;
-                    for (CodeBean codeBean : codeList) {
+                    for (CodeBean codeBean : codeMa.values()) {
                         if (codeBean.getSecret().equals(bean.getSecret())) {
                             newCodeBean = new CodeBean(codeBean.getUser(), codeBean.getSecret(), codeBean.getIssuer());
                         }
                     }
                     ll_item.removeView(convertView);
                     ll_item.removeView(line1);
-                    List<CodeBean> codeListUpdate = new ArrayList<>();
-                    codeListUpdate.add(newCodeBean);
-                    dynamicSetData(codeListUpdate);
+                    Map<String, CodeBean> codeMapUpdate = new HashMap<>();
+                    codeMapUpdate.put(newCodeBean.getSecret(), newCodeBean);
+                    dynamicSetData(codeMapUpdate);
                 }
             }.start();
 
@@ -183,7 +172,7 @@ public class MainActivity extends BaseActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             alertDialog.dismiss();
                             //更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
-                            codeList.remove(bean);
+                            codeMap.remove(bean.getSecret());
                             //保存在本地
                             saveSp();
                             ll_item.removeView(convertView);
@@ -196,9 +185,9 @@ public class MainActivity extends BaseActivity {
                             alertDialog.dismiss();
                             ll_item.removeView(convertView);
                             ll_item.removeView(line1);
-                            List<CodeBean> codeListUpdate = new ArrayList<>();
-                            codeListUpdate.add(bean);
-                            dynamicSetData(codeListUpdate);
+                            Map<String, CodeBean> codeMapUpdate = new HashMap<>();
+                            codeMapUpdate.put(bean.getSecret(), bean);
+                            dynamicSetData(codeMapUpdate);
                         }
                     });
                     builder.show();
@@ -248,6 +237,11 @@ public class MainActivity extends BaseActivity {
      * 修改别名
      */
     private void setModifyDialog(final View convertView, final View line1, final CountDownTimer timer, final CodeBean bean) {
+        /**
+         * 修改时倒计时取消
+         */
+        timer.cancel();
+
         final Dialog modifyDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
                 R.layout.pop_dialog_modify, null);
@@ -269,20 +263,15 @@ public class MainActivity extends BaseActivity {
         final EditText edit_name_modify = root.findViewById(R.id.edit_name_modify);
         edit_name_modify.setText(bean.getUser());
 
-        /**
-         * 修改时倒计时取消
-         */
-        timer.cancel();
-
         root.findViewById(R.id.btn_cancle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 modifyDialog.dismiss();
                 ll_item.removeView(convertView);
                 ll_item.removeView(line1);
-                List<CodeBean> codeListUpdate = new ArrayList<>();
-                codeListUpdate.add(bean);
-                dynamicSetData(codeListUpdate);
+                Map<String, CodeBean> codeMapUpdate = new HashMap<>();
+                codeMapUpdate.put(bean.getSecret(), bean);
+                dynamicSetData(codeMapUpdate);
             }
         });
         root.findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
@@ -297,22 +286,21 @@ public class MainActivity extends BaseActivity {
                     modifyDialog.dismiss();
                     ll_item.removeView(convertView);
                     ll_item.removeView(line1);
-                    List<CodeBean> codeListUpdate = new ArrayList<>();
-                    codeListUpdate.add(bean);
-                    dynamicSetData(codeListUpdate);
+                    Map<String, CodeBean> codeMapUpdate = new HashMap<>();
+                    codeMapUpdate.put(bean.getSecret(), bean);
+                    dynamicSetData(codeMapUpdate);
                 } else {
-                    codeList.remove(bean);
-                    saveSp();
+                    codeMap.remove(bean.getSecret());
                     CodeBean newCodeBean = new CodeBean(user, bean.getSecret(), bean.getIssuer());
-                    codeList.add(newCodeBean);
+                    codeMap.put(bean.getSecret(), newCodeBean);
                     saveSp();
 
                     modifyDialog.dismiss();
                     ll_item.removeView(convertView);
                     ll_item.removeView(line1);
-                    List<CodeBean> codeListUpdate = new ArrayList<>();
-                    codeListUpdate.add(newCodeBean);
-                    dynamicSetData(codeListUpdate);
+                    Map<String, CodeBean> codeMapUpdate = new HashMap<>();
+                    codeMapUpdate.put(newCodeBean.getSecret(), newCodeBean);
+                    dynamicSetData(codeMapUpdate);
                     Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -390,34 +378,44 @@ public class MainActivity extends BaseActivity {
                 String issuer = scanResultArr[1].split("=")[1];
                 //                Log.i(TAG, "secret= " + secret + "  issuer= " + issuer);
                 //更新数据源，并只将最新的一条item添加进父布局。
-                if (codeList.size() == 0) {
-                    List<CodeBean> codeListAdd = new ArrayList<>();
-                    codeListAdd.add(new CodeBean(user, secret, issuer));
-                    dynamicSetData(codeListAdd);
-                    codeList.add(new CodeBean(user, secret, issuer));
-
-                    //保存在本地
-                    saveSp();
-                } else {
-                    boolean isExistSecret = false;
-                    for (CodeBean bean : codeList) {
-                        if (secret.equals(bean.getSecret())) {
-                            isExistSecret = true;
-                            break;
-                        }
-                    }
-                    if (isExistSecret == false) {
-                        List<CodeBean> codeListAdd = new ArrayList<>();
-                        codeListAdd.add(new CodeBean(user, secret, issuer));
-                        dynamicSetData(codeListAdd);
-                        codeList.add(new CodeBean(user, secret, issuer));
-                        //保存在本地
-                        saveSp();
-                    } else {
-                        Log.i(TAG, secret + " 该秘钥值已存在，不用重复添加。");
-                        Toast.makeText(context, "已存在，不用重复添加", Toast.LENGTH_SHORT).show();
-                    }
+                if (codeMap.size() > 0 && codeMap.containsKey(secret)) {
+                    Toast.makeText(context, "已存在", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                codeMap.put(secret, new CodeBean(user, secret, issuer));
+                saveSp();
+                Map<String, CodeBean> codeMapUpdate = new HashMap<>();
+                codeMapUpdate.put(secret, new CodeBean(user, secret, issuer));
+                dynamicSetData(codeMapUpdate);
+
+                //                if (codeList.size() == 0) {
+                //                    List<CodeBean> codeListAdd = new ArrayList<>();
+                //                    codeListAdd.add(new CodeBean(user, secret, issuer));
+                //                    dynamicSetData(codeListAdd);
+                //                    codeList.add(new CodeBean(user, secret, issuer));
+                //
+                //                    //保存在本地
+                //                    saveSp();
+                //                } else {
+                //                    boolean isExistSecret = false;
+                //                    for (CodeBean bean : codeList) {
+                //                        if (secret.equals(bean.getSecret())) {
+                //                            isExistSecret = true;
+                //                            break;
+                //                        }
+                //                    }
+                //                    if (isExistSecret == false) {
+                //                        List<CodeBean> codeListAdd = new ArrayList<>();
+                //                        codeListAdd.add(new CodeBean(user, secret, issuer));
+                //                        dynamicSetData(codeListAdd);
+                //                        codeList.add(new CodeBean(user, secret, issuer));
+                //                        //保存在本地
+                //                        saveSp();
+                //                    } else {
+                //                        Log.i(TAG, secret + " 该秘钥值已存在，不用重复添加。");
+                //                        Toast.makeText(context, "已存在，不用重复添加", Toast.LENGTH_SHORT).show();
+                //                    }
+                //                }
             } else {
                 Toast.makeText(context, "扫描结果错误！请重新扫描", Toast.LENGTH_SHORT).show();
             }
@@ -452,18 +450,18 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 将数据保存在SharedPreferences
+     * 将数据保存在SharedPreferences。不能存重复的
      */
     private void saveSp() {
         String codeStr = "";
-        for (CodeBean bean : codeList) {
+        for (CodeBean bean : codeMap.values()) {
             if (codeStr.length() == 0) {
                 codeStr = bean.getUser() + ":" + bean.getSecret() + ":" + bean.getIssuer();
             } else {
                 codeStr = codeStr + "-" + bean.getUser() + ":" + bean.getSecret() + ":" + bean.getIssuer();
             }
         }
-        Log.i(TAG, "codeStr= " + codeStr);
+        Log.i(TAG, "存储最新codeStr= " + codeStr);
         SharedPreferences sp = getSharedPreferences("codeList", MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.clear();

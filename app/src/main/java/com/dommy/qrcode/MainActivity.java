@@ -165,6 +165,7 @@ public class MainActivity extends BaseActivity {
                 public void onClick(View view) {
                     timer.cancel();
                     final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setCancelable(false);
                     builder.setTitle("删除提示");
                     builder.setMessage("删除后秘钥信息将不存在。请提前保存秘钥值或秘钥二维码！");
                     final AlertDialog alertDialog = builder.create();

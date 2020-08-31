@@ -19,17 +19,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/light_gray5"
-            android:textSize="@dimen/sp_18" />
+            android:textSize="@dimen/sp_19" />
 
         <TextView
             android:id="@+id/btn_del"
-            android:layout_width="@dimen/dp_80"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_35"
-            android:layout_gravity="center"
-            android:gravity="right"
+            android:layout_marginRight="@dimen/dp_3"
+            android:gravity="center"
             android:text="删除"
             android:textColor="@color/red3"
-            android:textSize="@dimen/sp_13" />
+            android:textSize="@dimen/sp_14" />
 
     </LinearLayout>
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/light_blue"
-            android:textSize="@dimen/sp_32"
+            android:textSize="@dimen/sp_33"
             android:textStyle="bold" />
 
 

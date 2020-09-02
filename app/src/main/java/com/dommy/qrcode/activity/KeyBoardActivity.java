@@ -97,11 +97,11 @@ public class KeyBoardActivity extends BaseActivity {
                     Toast.makeText(context, "秘钥只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (sercet.length() < 16) {
-                    Toast.makeText(context, "秘钥长度不能低于16位", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-//                long user = System.currentTimeMillis();
+                //                if (sercet.length() < 16) {
+                //                    Toast.makeText(context, "秘钥长度不能低于16位", Toast.LENGTH_SHORT).show();
+                //                    return;
+                //                }
+                //                long user = System.currentTimeMillis();
                 result = result + user + "?secret=" + sercet.toUpperCase() + "&issuer= ";
                 Intent resultIntent = new Intent();
                 Bundle bundle = new Bundle();

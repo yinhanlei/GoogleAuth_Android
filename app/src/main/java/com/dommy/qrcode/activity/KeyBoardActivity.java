@@ -116,7 +116,7 @@ public class KeyBoardActivity extends BaseActivity {
                 }
 
                 //获取不到就提示不合法
-                String codeStr = MainActivity.getAuthCodeTest(sercet, System.currentTimeMillis());
+                String codeStr = MainActivity.getAuthCodeTest(sercet.toUpperCase(), System.currentTimeMillis());
                 Log.i(TAG, "codeStr= " + codeStr);
                 if (codeStr == null || codeStr.length() == 0) {
                     Toast.makeText(context, "秘钥不合法", Toast.LENGTH_SHORT).show();

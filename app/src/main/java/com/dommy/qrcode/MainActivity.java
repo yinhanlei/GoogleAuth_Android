@@ -219,7 +219,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 修改别名
      */
-    private void setModifyDialog(final TextView issuer, final CodeBean bean) {
+    private void setModifyDialog(final TextView userAndIssuer, final CodeBean bean) {
         final Dialog modifyDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
                 R.layout.pop_dialog_modify, null);
@@ -263,7 +263,11 @@ public class MainActivity extends BaseActivity {
                     codeMap.put(bean.getSecret(), newCodeBean);
                     saveSp();
                     modifyDialog.dismiss();
-                    issuer.setText(user);
+                    if (bean.getIssuer().equals(" ")) {
+                        userAndIssuer.setText(user);
+                    } else {
+                        userAndIssuer.setText(bean.getIssuer() + " (" + user + ")");
+                    }
                     Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -342,7 +346,7 @@ public class MainActivity extends BaseActivity {
                 //                Log.i(TAG, "secret= " + secret + "  issuer= " + issuer);
                 //更新数据源，并只将最新的一条item添加进父布局。
                 if (codeMap.size() > 0 && codeMap.containsKey(secret)) {
-                    Toast.makeText(context, "已存在", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "秘钥已存在", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 codeMap.put(secret, new CodeBean(user, secret, issuer));

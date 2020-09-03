@@ -41,12 +41,7 @@ import java.util.Map;
 
 /**
  * 布局实现原理：1不采用list item添加定时器的方式。
- * 2采用动态添加布局的方式。
- * 3数据源的处理，第一次启动APP如果本地有保存数据则读出并做第一次全量显示。
- * 新增时，更新数据源，并只将最新的一条item添加进父布局。
- * 倒计时结束时，要重新起定时器，这里的处理是不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
- * 删除时，更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
- * 修改时，
+ * 2采用动态布局+倒计时结束重启的方式去更新item。
  */
 public class MainActivity extends BaseActivity {
 
@@ -76,8 +71,6 @@ public class MainActivity extends BaseActivity {
                 setAddDialog();
             }
         });
-        //        codeMap.add("LOXKOKAZZ6AXNQCEQ",new CodeBean("测试1","LOXKOKAZZ6AXNQCEQ", "测试"));
-        //        codeMap.add("52MM34W6OFWETSKF",new CodeBean("测试2","52MM34W6OFWETSKF", "测试"));
         SharedPreferences sp = getSharedPreferences("codeList", MODE_PRIVATE);
         String codeStr = sp.getString("codeStr", "");
         Log.i(TAG, "本地存储codeStr= " + codeStr);
@@ -101,215 +94,90 @@ public class MainActivity extends BaseActivity {
             dynamicSetData(codeMap);
     }
 
-
-//    /**
-//     * 首次动态显示相对布局数据
-//     */
-//    private void dynamicSetData(final Map<String, CodeBean> codeMa) {
-//        int id = 1;
-//        for (final CodeBean bean : codeMa.values()) {
-//            Log.i(TAG, "getSecret= " + bean.getSecret());
-//
-//            final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
-//            LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
-//            TextView code = convertView.findViewById(R.id.code);
-//            final TextView issuer = convertView.findViewById(R.id.issuer);
-//            TextView btn_del = convertView.findViewById(R.id.btn_del);
-//            final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
-//            String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
-//            codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
-//            code.setText(codeStr);
-//            if (bean.getIssuer().equals(" ")) {
-//                issuer.setText(bean.getUser());
-//            } else {
-//                issuer.setText(bean.getIssuer() + " (" + bean.getUser() + ")");
-//            }
-//
-//            if (id == 1) {
-//                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-//                lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);//与父容器的左侧对齐
-//                lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);//与父容器的上侧对齐
-//                lp.topMargin = 10;
-//                convertView.setId(id);//设置这个View 的id
-//                convertView.setLayoutParams(lp);//设置布局参数
-//                ll_item.addView(convertView);//RelativeLayout添加子View
-//                id++;
-//            } else {
-//                View item1 = ll_item.getChildAt(0);
-//                Log.i(TAG, "item1= " + item1.getId());
-//
-//                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-//                //                lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-//                //                lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);//与父容器的上侧对齐
-//                lp.addRule(RelativeLayout.BELOW, item1.getId());//设置item2在item1的下面
-//                lp.topMargin = 20;
-//                convertView.setId(id);//设置这个View 的id
-//                convertView.setLayoutParams(lp);//设置布局参数
-//                ll_item.addView(convertView);//RelativeLayout添加子View
-//                id++;
-//            }
-//
-//
-//            final CountDownTimer timer = new CountDownTimer(30 * 1000, 1000) {
-//                @Override
-//                public void onTick(long millisUntilFinished) {
-//                    countdown.setProgress((int) millisUntilFinished / 1000);
-//                    //                    countdown.setText("" + millisUntilFinished / 1000);
-//                }
-//
-//                @Override
-//                public void onFinish() {
-//                    //倒计时结束后，不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
-//                    //                    CodeBean newCodeBean = null;
-//                    //                    for (CodeBean codeBean : codeMa.values()) {
-//                    //                        if (codeBean.getSecret().equals(bean.getSecret())) {
-//                    //                            newCodeBean = new CodeBean(codeBean.getUser(), codeBean.getSecret(), codeBean.getIssuer());
-//                    //                        }
-//                    //                    }
-//                    //                    ll_item.removeView(convertView);
-//                    //                    Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-//                    //                    codeMapUpdate.put(newCodeBean.getSecret(), newCodeBean);
-//                    //                    dynamicSetData(codeMapUpdate);
-//                }
-//            }.start();
-//            ll_click.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View view) {
-//                    //弹出修改user值
-//                    //                    issuer.setText("888888");
-//                    setModifyDialog(convertView, null, timer, bean);
-//                    return false;
-//                }
-//            });
-//            btn_del.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    timer.cancel();
-//                    final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-//                    builder.setCancelable(false);
-//                    builder.setTitle("删除提示");
-//                    builder.setMessage("删除后秘钥信息将不存在。请提前保存秘钥值或秘钥二维码！");
-//                    final AlertDialog alertDialog = builder.create();
-//                    builder.setPositiveButton("继续删除", new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            alertDialog.dismiss();
-//                            //更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
-//                            codeMap.remove(bean.getSecret());
-//                            //保存在本地
-//                            saveSp();
-//                            ll_item.removeView(convertView);
-//                            Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//                    builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            alertDialog.dismiss();
-//                            ll_item.removeView(convertView);
-//                            Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-//                            codeMapUpdate.put(bean.getSecret(), bean);
-//                            dynamicSetData(codeMapUpdate);
-//                        }
-//                    });
-//                    builder.show();
-//                }
-//            });
-//        }
-//    }
-
-
-        /**
-         * 动态显示数据
-         */
-        private void dynamicSetData(final Map<String, CodeBean> codeMa) {
-            for (final CodeBean bean : codeMa.values()) {
-
-                Log.i(TAG, "getSecret= " + bean.getSecret());
-
-                final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
-                LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
-                TextView code = convertView.findViewById(R.id.code);
-                final TextView issuer = convertView.findViewById(R.id.issuer);
-                TextView btn_del = convertView.findViewById(R.id.btn_del);
-                final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
-                String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
-                codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
-                code.setText(codeStr);
-                if (bean.getIssuer().equals(" ")) {
-                    issuer.setText(bean.getUser());
-                } else {
-                    issuer.setText(bean.getIssuer() + " (" + bean.getUser() + ")");
-                }
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                layoutParams.setMargins(0, 20, 0, 0);//4个参数按顺序分别是左上右下
-
-                convertView.setLayoutParams(layoutParams);//设置布局参数
-                ll_item.addView(convertView);
-
-                final CountDownTimer timer = new CountDownTimer(30 * 1000, 1000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        countdown.setProgress((int) millisUntilFinished / 1000);
-                        //                    countdown.setText("" + millisUntilFinished / 1000);
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        //倒计时结束后，不更新数据源，但要将这个ietm布局移除，然后再单独添加进入父布局。
-                        CodeBean newCodeBean = null;
-                        for (CodeBean codeBean : codeMa.values()) {
-                            if (codeBean.getSecret().equals(bean.getSecret())) {
-                                newCodeBean = new CodeBean(codeBean.getUser(), codeBean.getSecret(), codeBean.getIssuer());
-                            }
-                        }
-                        ll_item.removeView(convertView);
-                        Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-                        codeMapUpdate.put(newCodeBean.getSecret(), newCodeBean);
-                        dynamicSetData(codeMapUpdate);
-                    }
-                }.start();
-                ll_click.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View view) {
-                        //弹出修改user值
-                        //                    issuer.setText("888888");
-                        setModifyDialog(convertView, timer, bean);
-                        return false;
-                    }
-                });
-                btn_del.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        timer.cancel();
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setCancelable(false);
-                        builder.setTitle("删除提示");
-                        builder.setMessage("删除后秘钥信息将不存在。请提前保存秘钥值或秘钥二维码！");
-                        final AlertDialog alertDialog = builder.create();
-                        builder.setPositiveButton("继续删除", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                alertDialog.dismiss();
-                                //更新数据源，并将这个ietm布局移除，然后再单独添加进入父布局。
-                                codeMap.remove(bean.getSecret());
-                                //保存在本地
-                                saveSp();
-                                ll_item.removeView(convertView);
-                                Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                alertDialog.dismiss();
-                                ll_item.removeView(convertView);
-                                Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-                                codeMapUpdate.put(bean.getSecret(), bean);
-                                dynamicSetData(codeMapUpdate);
-                            }
-                        });
-                        builder.show();
-                    }
-                });
+    /**
+     * 动态布局，显示数据，位置固定不变。
+     * 下面两个情况执行dynamicSetData方法：
+     * 1、启动APP首次进来，全部显示。
+     * 2、新增秘钥时，仅处理新增item。
+     *
+     * @param codeMa
+     */
+    private void dynamicSetData(final Map<String, CodeBean> codeMa) {
+        for (final CodeBean bean : codeMa.values()) {
+            final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
+            LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
+            final TextView code = convertView.findViewById(R.id.code);
+            final TextView userAndIssuer = convertView.findViewById(R.id.userAndIssuer);
+            TextView btn_del = convertView.findViewById(R.id.btn_del);
+            final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
+            String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
+            codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
+            code.setText(codeStr);
+            if (bean.getIssuer().equals(" ")) {
+                userAndIssuer.setText(bean.getUser());
+            } else {
+                userAndIssuer.setText(bean.getIssuer() + " (" + bean.getUser() + ")");
             }
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.setMargins(0, 20, 0, 0);//4个参数按顺序分别是左上右下
+
+            convertView.setLayoutParams(layoutParams);//设置布局参数
+            ll_item.addView(convertView);
+
+            final CountDownTimer timer = new CountDownTimer(30 * 1000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    countdown.setProgress((int) millisUntilFinished / 1000);
+                }
+
+                @Override
+                public void onFinish() {
+                    //倒计时结束后，直接更新code值
+
+                    String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
+                    codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
+                    code.setText(codeStr);
+
+                    this.start();//特别注意，CountDownTimer倒计时结束后，onFinish内重启只能用this.start()。
+                }
+            }.start();
+            ll_click.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    //弹出修改user值
+                    setModifyDialog(userAndIssuer, bean);
+                    return false;
+                }
+            });
+            btn_del.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setCancelable(false);
+                    builder.setTitle("删除提示");
+                    builder.setMessage("删除后秘钥信息将不存在。请提前保存秘钥值或秘钥二维码！");
+                    final AlertDialog alertDialog = builder.create();
+                    builder.setPositiveButton("继续删除", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            alertDialog.dismiss();
+                            //更新数据源
+                            codeMap.remove(bean.getSecret());
+                            //保存在本地
+                            saveSp();
+                            ll_item.removeView(convertView);
+                            Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //                                alertDialog.dismiss();
+                        }
+                    });
+                    builder.show();
+                }
+            });
         }
+    }
 
     private void setAddDialog() {
         final Dialog mCameraDialog = new Dialog(this, R.style.BottomDialog);
@@ -351,12 +219,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 修改别名
      */
-    private void setModifyDialog(final View convertView, final CountDownTimer timer, final CodeBean bean) {
-        /**
-         * 修改时倒计时取消
-         */
-        timer.cancel();
-
+    private void setModifyDialog(final TextView issuer, final CodeBean bean) {
         final Dialog modifyDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
                 R.layout.pop_dialog_modify, null);
@@ -382,10 +245,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 modifyDialog.dismiss();
-                ll_item.removeView(convertView);
-                Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-                codeMapUpdate.put(bean.getSecret(), bean);
-                dynamicSetData(codeMapUpdate);
             }
         });
         root.findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
@@ -397,22 +256,14 @@ public class MainActivity extends BaseActivity {
                     return;
                 }
                 if (user.equals(bean.getUser())) {
-                    modifyDialog.dismiss();
-                    ll_item.removeView(convertView);
-                    Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-                    codeMapUpdate.put(bean.getSecret(), bean);
-                    dynamicSetData(codeMapUpdate);
+                    Toast.makeText(context, "请修改", Toast.LENGTH_SHORT).show();
                 } else {
                     codeMap.remove(bean.getSecret());
                     CodeBean newCodeBean = new CodeBean(user, bean.getSecret(), bean.getIssuer());
                     codeMap.put(bean.getSecret(), newCodeBean);
                     saveSp();
-
                     modifyDialog.dismiss();
-                    ll_item.removeView(convertView);
-                    Map<String, CodeBean> codeMapUpdate = new HashMap<>();
-                    codeMapUpdate.put(newCodeBean.getSecret(), newCodeBean);
-                    dynamicSetData(codeMapUpdate);
+                    issuer.setText(user);
                     Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show();
                 }
             }

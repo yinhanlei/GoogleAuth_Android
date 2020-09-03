@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dommy.qrcode.MainActivity;
 import com.dommy.qrcode.R;
 import com.dommy.qrcode.base.BaseActivity;
 import com.dommy.qrcode.util.Constant;
@@ -25,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public class KeyBoardActivity extends BaseActivity {
 
-    //    private static final String TAG = "KeyBoardActivity";
+    private static final String TAG = "KeyBoardActivity";
     private TextView btn_back, btn_add;
     private EditText edit_name, edit_sercet;
     private Context context;
@@ -78,17 +80,17 @@ public class KeyBoardActivity extends BaseActivity {
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String result = "otpauth://totp/";//otpauth://totp/?secret=LOXKOKZZ6AXNQCEQ&issuer=HUOBI
+                String result = "otpauth://totp/";//otpauth://totp/{用户名}?secret=LOXKOKZZ6AXNQCEQ&issuer=HUOBI
                 String user = edit_name.getText().toString();
                 String sercet = edit_sercet.getText().toString();
                 if (user.length() == 0 || sercet.length() == 0) {
                     Toast.makeText(context, "请填写完整", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (isNumeric(user)) {
-                    Toast.makeText(context, "别名不能全是数字", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                //                if (isNumeric(user)) {
+                //                    Toast.makeText(context, "别名不能全是数字", Toast.LENGTH_SHORT).show();
+                //                    return;
+                //                }
                 if (isNumeric(sercet)) {
                     Toast.makeText(context, "秘钥不能全是数字", Toast.LENGTH_SHORT).show();
                     return;
@@ -97,10 +99,29 @@ public class KeyBoardActivity extends BaseActivity {
                     Toast.makeText(context, "秘钥只能是字母和数字的组合", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //                if (sercet.length() < 16) {
-                //                    Toast.makeText(context, "秘钥长度不能低于16位", Toast.LENGTH_SHORT).show();
-                //                    return;
-                //                }
+                if (sercet.length() < 10) {
+                    Toast.makeText(context, "秘钥长度不能低于10位", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //前9位不能全是相同的数字
+                String sercet9 = sercet.substring(0, 9);
+                if (sercet9.equals("111111111")) {
+                    Toast.makeText(context, "秘钥9位不能全是1", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (sercet9.equals("000000000")) {
+                    Toast.makeText(context, "秘钥9位不能全是0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //获取不到就提示不合法
+                String codeStr = MainActivity.getAuthCodeTest(sercet, System.currentTimeMillis());
+                Log.i(TAG, "codeStr= " + codeStr);
+                if (codeStr == null || codeStr.length() == 0) {
+                    Toast.makeText(context, "秘钥不合法", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //                long user = System.currentTimeMillis();
                 result = result + user + "?secret=" + sercet.toUpperCase() + "&issuer= ";
                 Intent resultIntent = new Intent();

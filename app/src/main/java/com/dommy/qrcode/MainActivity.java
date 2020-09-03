@@ -111,6 +111,9 @@ public class MainActivity extends BaseActivity {
             TextView btn_del = convertView.findViewById(R.id.btn_del);
             final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
             String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
+            Log.i(TAG, "codeStr= " + codeStr);
+            if(codeStr == null || codeStr.length() ==0)
+                continue;
             codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
             code.setText(codeStr);
             if (bean.getIssuer().equals(" ")) {
@@ -277,7 +280,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 根据秘钥生成此刻的验证码
      */
-    public String getAuthCodeTest(String savedSecret, long timeMsec) {
+    public  static String getAuthCodeTest(String savedSecret, long timeMsec) {
         String codeStr = "";
         try {
             codeStr = GoogleAuthenticator.getAuthCode(savedSecret, timeMsec) + "";

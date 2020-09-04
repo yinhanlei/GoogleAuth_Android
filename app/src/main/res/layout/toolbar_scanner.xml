@@ -29,7 +29,7 @@
             android:layout_centerInParent="true"
             android:text="扫描二维码"
             android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:textSize="@dimen/sp_20" />
 
         <!--<Button-->
             <!--android:id="@+id/btn_album"-->

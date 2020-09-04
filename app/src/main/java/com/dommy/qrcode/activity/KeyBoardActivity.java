@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +29,8 @@ import java.util.regex.Pattern;
 public class KeyBoardActivity extends BaseActivity {
 
     private static final String TAG = "KeyBoardActivity";
-    private TextView btn_back, btn_add;
+    private ImageButton btn_back;
+    private TextView btn_add;
     private EditText edit_name, edit_sercet;
     private Context context;
     private Handler handler;

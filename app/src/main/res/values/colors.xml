@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#4286F5</color>
     <color name="colorPrimaryDark">#4286F5</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#4286F5</color>
     <!-- QRCode scanner color begin -->
     <color name="viewfinder_mask">#60000000</color>
     <color name="result_view">#B0000000</color>

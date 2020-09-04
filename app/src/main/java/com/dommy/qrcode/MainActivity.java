@@ -95,6 +95,8 @@ public class MainActivity extends BaseActivity {
                 String issuer = codeStrArr[2];
                 codeMap.put(sercet, new CodeBean(user, sercet, issuer));
             }
+        } else {
+            //            Toast.makeText(context, "请新增一个秘钥", Toast.LENGTH_SHORT).show();
         }
         if (codeMap.size() > 0)
             dynamicSetData(codeMap);

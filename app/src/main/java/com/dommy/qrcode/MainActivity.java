@@ -31,6 +31,7 @@ import com.dommy.qrcode.base.BaseActivity;
 import com.dommy.qrcode.bean.CodeBean;
 import com.dommy.qrcode.googleAuth.GoogleAuthenticator;
 import com.dommy.qrcode.util.Constant;
+import com.dommy.qrcode.util.UrlDecodeUtils;
 import com.dommy.qrcode.view.RingProgressBar;
 import com.google.zxing.activity.CaptureActivity;
 
@@ -51,6 +52,9 @@ public class MainActivity extends BaseActivity {
     private Context context;
     private Handler handler;
     private LinearLayout ll_item;//item父布局
+
+    private static final String splitChars1 = "ΞυяにソΞ";//用特殊符号做一条好友信息的属性间分隔符，永久固定，不可更改。
+    private static final String splitChars2 = "にΞυソяに";//用特殊符号做多条好友信息间分隔符，永久固定，不可更改。
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,19 +78,21 @@ public class MainActivity extends BaseActivity {
         SharedPreferences sp = getSharedPreferences("codeList", MODE_PRIVATE);
         String codeStr = sp.getString("codeStr", "");
         Log.i(TAG, "本地存储codeStr= " + codeStr);
-        if (codeStr.length() > 0 && codeStr.contains(":")) {
-            if (codeStr.contains("-")) {//存多个
-                String[] codeStrArr = codeStr.split("-");
+        if (codeStr.length() > 0 && codeStr.contains(splitChars1)) {
+            if (codeStr.contains(splitChars2)) {//存多个
+                String[] codeStrArr = codeStr.split(splitChars2);
                 for (String codeStr1 : codeStrArr) {
-                    String user = codeStr1.split(":")[0];
-                    String sercet = codeStr1.split(":")[1];
-                    String issuer = codeStr1.split(":")[2];
+                    String[] codeStr1Arr = codeStr1.split(splitChars1);
+                    String user = codeStr1Arr[0];
+                    String sercet = codeStr1Arr[1];
+                    String issuer = codeStr1Arr[2];
                     codeMap.put(sercet, new CodeBean(user, sercet, issuer));
                 }
             } else {//只存一个
-                String user = codeStr.split(":")[0];
-                String sercet = codeStr.split(":")[1];
-                String issuer = codeStr.split(":")[2];
+                String[] codeStrArr = codeStr.split(splitChars1);
+                String user = codeStrArr[0];
+                String sercet = codeStrArr[1];
+                String issuer = codeStrArr[2];
                 codeMap.put(sercet, new CodeBean(user, sercet, issuer));
             }
         }
@@ -106,21 +112,22 @@ public class MainActivity extends BaseActivity {
         for (final CodeBean bean : codeMa.values()) {
             final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
             LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
-            final TextView code = convertView.findViewById(R.id.code);
-            final TextView userAndIssuer = convertView.findViewById(R.id.userAndIssuer);
             TextView btn_del = convertView.findViewById(R.id.btn_del);
             final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
+
+            final TextView code = convertView.findViewById(R.id.code);
+            TextView issuer = convertView.findViewById(R.id.issuer);
+            final TextView user = convertView.findViewById(R.id.user);
+
+            issuer.setText(bean.getIssuer());
+            user.setText(bean.getUser());
             String codeStr = getAuthCodeTest(bean.getSecret(), System.currentTimeMillis());
             Log.i(TAG, "codeStr= " + codeStr);
-            if(codeStr == null || codeStr.length() ==0)
+            if (codeStr == null || codeStr.length() == 0)
                 continue;
             codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
             code.setText(codeStr);
-            if (bean.getIssuer().equals(" ")) {
-                userAndIssuer.setText(bean.getUser());
-            } else {
-                userAndIssuer.setText(bean.getIssuer() + " (" + bean.getUser() + ")");
-            }
+
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.setMargins(0, 20, 0, 0);//4个参数按顺序分别是左上右下
 
@@ -148,7 +155,7 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public boolean onLongClick(View view) {
                     //弹出修改user值
-                    setModifyDialog(userAndIssuer, bean);
+                    setModifyDialog(user, bean);
                     return false;
                 }
             });
@@ -222,7 +229,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 修改别名
      */
-    private void setModifyDialog(final TextView userAndIssuer, final CodeBean bean) {
+    private void setModifyDialog(final TextView userTv, final CodeBean bean) {
         final Dialog modifyDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
                 R.layout.pop_dialog_modify, null);
@@ -266,11 +273,7 @@ public class MainActivity extends BaseActivity {
                     codeMap.put(bean.getSecret(), newCodeBean);
                     saveSp();
                     modifyDialog.dismiss();
-                    if (bean.getIssuer().equals(" ")) {
-                        userAndIssuer.setText(user);
-                    } else {
-                        userAndIssuer.setText(bean.getIssuer() + " (" + user + ")");
-                    }
+                    userTv.setText(user);
                     Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -280,7 +283,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 根据秘钥生成此刻的验证码
      */
-    public  static String getAuthCodeTest(String savedSecret, long timeMsec) {
+    public static String getAuthCodeTest(String savedSecret, long timeMsec) {
         String codeStr = "";
         try {
             codeStr = GoogleAuthenticator.getAuthCode(savedSecret, timeMsec) + "";
@@ -323,7 +326,6 @@ public class MainActivity extends BaseActivity {
         startActivityForResult(intent, Constant.REQ_QR_CODE);
     }
 
-
     /**
      * 扫描结果回调。
      *
@@ -338,15 +340,19 @@ public class MainActivity extends BaseActivity {
             Bundle bundle = data.getExtras();
             String scanResult = bundle.getString(Constant.INTENT_EXTRA_KEY_QR_SCAN);
             //将扫描出的信息显示出来，otpauth://totp/13126687200?secret=LOXKOKZZ6AXNQCEQ&issuer=HUOBI
+            //            scanResult = "otpauth://totp/admin?secret=LOXKOKZZ6AXNQCEA&issuer=%E8%96%AA%E9%85%AC%E7%B3%BB%E7%BB%9F";
             Log.i(TAG, "scanResult= " + scanResult);
             if (scanResult.length() > 0 && scanResult.contains("secret=")) {//要将其加到list里，且重复的不能添加。之后要更新适配器。还得将最新的list保存进本地
                 String[] aArr = scanResult.replace("//", "").split("\\?");
                 String user = aArr[0].split("/")[1];
-                //                Log.i(TAG, "user= " + user);
+                if (user != null && user.length() > 0)
+                    user = UrlDecodeUtils.toURLDecoder(user);
                 String[] scanResultArr = aArr[1].split("&");
                 String secret = scanResultArr[0].split("=")[1];
                 String issuer = scanResultArr[1].split("=")[1];
-                //                Log.i(TAG, "secret= " + secret + "  issuer= " + issuer);
+                if (issuer != null && issuer.length() > 0)
+                    issuer = UrlDecodeUtils.toURLDecoder(issuer);
+
                 //更新数据源，并只将最新的一条item添加进父布局。
                 if (codeMap.size() > 0 && codeMap.containsKey(secret)) {
                     Toast.makeText(context, "秘钥已存在", Toast.LENGTH_SHORT).show();
@@ -426,9 +432,9 @@ public class MainActivity extends BaseActivity {
         String codeStr = "";
         for (CodeBean bean : codeMap.values()) {
             if (codeStr.length() == 0) {
-                codeStr = bean.getUser() + ":" + bean.getSecret() + ":" + bean.getIssuer();
+                codeStr = bean.getUser() + splitChars1 + bean.getSecret() + splitChars1 + bean.getIssuer();
             } else {
-                codeStr = codeStr + "-" + bean.getUser() + ":" + bean.getSecret() + ":" + bean.getIssuer();
+                codeStr = codeStr + splitChars2 + bean.getUser() + splitChars1 + bean.getSecret() + splitChars1 + bean.getIssuer();
             }
         }
         Log.i(TAG, "存储最新codeStr= " + codeStr);

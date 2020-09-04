@@ -6,7 +6,10 @@
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="vertical"
-    android:padding="@dimen/dp_20">
+    android:paddingLeft="@dimen/dp_20"
+    android:paddingTop="@dimen/dp_5"
+    android:paddingRight="@dimen/dp_20"
+    android:paddingBottom="@dimen/dp_5">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,12 +17,13 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/userAndIssuer"
+            android:id="@+id/issuer"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/light_gray5"
-            android:textSize="@dimen/sp_19" />
+            android:textSize="@dimen/sp_19"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btn_del"
@@ -33,34 +37,33 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/light_blue"
+        android:textSize="@dimen/sp_33"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/code"
+            android:id="@+id/user"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:textColor="@color/light_blue"
-            android:textSize="@dimen/sp_33"
-            android:textStyle="bold" />
-
-
-        <!--<TextView-->
-        <!--android:id="@+id/countdown"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:gravity="center"-->
-        <!--android:text="倒计时"-->
-        <!--android:textColor="@color/light_blue"-->
-        <!--android:textSize="@dimen/sp_15" />-->
+            android:gravity="center_vertical"
+            android:textColor="@color/light_gray5"
+            android:textSize="@dimen/sp_19" />
 
         <com.dommy.qrcode.view.RingProgressBar
             android:id="@+id/countdown"
-            android:layout_width="@dimen/dp_35"
-            android:layout_height="@dimen/dp_35"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
             android:layout_alignParentTop="false"
             android:layout_centerInParent="false"
             android:layout_gravity="center"

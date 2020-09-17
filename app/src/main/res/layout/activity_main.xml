@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:background="@color/light_gray1"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/dp_20">
+    android:paddingBottom="@dimen/dp_25">
 
     <LinearLayout
         android:id="@+id/title"
@@ -55,12 +55,12 @@
 
     <TextView
         android:id="@+id/btn_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/dp_70"
+        android:layout_height="@dimen/dp_70"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:layout_marginRight="@dimen/dp_20"
-        android:background="@drawable/btn_add" />
+        android:background="@drawable/img_add" />
 
 </RelativeLayout>
 

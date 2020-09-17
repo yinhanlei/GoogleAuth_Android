@@ -84,7 +84,7 @@ public class KeyBoardActivity extends BaseActivity {
             public void onClick(View view) {
                 String result = "otpauth://totp/";//otpauth://totp/{用户名}?secret=LOXKOKZZ6AXNQCEQ&issuer=HUOBI
                 String user = edit_name.getText().toString();
-                String sercet = edit_sercet.getText().toString();
+                String sercet = edit_sercet.getText().toString().replace(" ","");
                 if (user.length() == 0 || sercet.length() == 0) {
                     Toast.makeText(context, "请填写完整", Toast.LENGTH_SHORT).show();
                     return;

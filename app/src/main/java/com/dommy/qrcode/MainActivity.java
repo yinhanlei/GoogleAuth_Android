@@ -52,6 +52,7 @@ public class MainActivity extends BaseActivity {
     private Context context;
     private Handler handler;
     private LinearLayout ll_item;//item父布局
+    private View emptyView;//最下面的空布局，为了避免遮挡时间进度条
 
     private static final String splitChars1 = "ΞυяにソΞ";//用特殊符号做一条好友信息的属性间分隔符，永久固定，不可更改。
     private static final String splitChars2 = "にΞυソяに";//用特殊符号做多条好友信息间分隔符，永久固定，不可更改。
@@ -111,15 +112,24 @@ public class MainActivity extends BaseActivity {
      * @param codeMa
      */
     private void dynamicSetData(final Map<String, CodeBean> codeMa) {
-        for (final CodeBean bean : codeMa.values()) {
-            final View convertView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
-            LinearLayout ll_click = convertView.findViewById(R.id.ll_click);
-            TextView btn_del = convertView.findViewById(R.id.btn_del);
-            final RingProgressBar countdown = convertView.findViewById(R.id.countdown);
+        //遍历前清除空布局
+        if (emptyView !=null)
+            ll_item.removeView(emptyView);
 
-            final TextView code = convertView.findViewById(R.id.code);
-            TextView issuer = convertView.findViewById(R.id.issuer);
-            final TextView user = convertView.findViewById(R.id.user);
+        //遍历追加item
+        for (final CodeBean bean : codeMa.values()) {
+            final View itemView = LayoutInflater.from(context).inflate(R.layout.item_code, null);
+            LinearLayout ll_click = itemView.findViewById(R.id.ll_click);
+            TextView btn_del = itemView.findViewById(R.id.btn_del);
+            final RingProgressBar countdown = itemView.findViewById(R.id.countdown);
+
+            final TextView code = itemView.findViewById(R.id.code);
+            TextView issuer = itemView.findViewById(R.id.issuer);
+            final TextView user = itemView.findViewById(R.id.user);
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.setMargins(0, 20, 0, 0);//4个参数按顺序分别是左上右下
+            itemView.setLayoutParams(layoutParams);//设置布局参数
 
             issuer.setText(bean.getIssuer());
             user.setText(bean.getUser());
@@ -130,11 +140,7 @@ public class MainActivity extends BaseActivity {
             codeStr = codeStr.substring(0, 3) + " " + codeStr.substring(3, codeStr.length());
             code.setText(codeStr);
 
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(0, 20, 0, 0);//4个参数按顺序分别是左上右下
-
-            convertView.setLayoutParams(layoutParams);//设置布局参数
-            ll_item.addView(convertView);
+            ll_item.addView(itemView);
 
             final CountDownTimer timer = new CountDownTimer(30 * 1000, 1000) {
                 @Override
@@ -176,7 +182,7 @@ public class MainActivity extends BaseActivity {
                             codeMap.remove(bean.getSecret());
                             //保存在本地
                             saveSp();
-                            ll_item.removeView(convertView);
+                            ll_item.removeView(itemView);
                             Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -189,6 +195,11 @@ public class MainActivity extends BaseActivity {
                 }
             });
         }
+
+        //遍历后添加空布局
+        if(emptyView == null)
+            emptyView = LayoutInflater.from(context).inflate(R.layout.item_code_empty, null);
+        ll_item.addView(emptyView);
     }
 
     private void setAddDialog() {

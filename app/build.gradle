@@ -7,8 +7,8 @@ android {
         applicationId "com.dommy.qrcode"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 3
-        versionName "3"
+        versionCode 7
+        versionName "7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
